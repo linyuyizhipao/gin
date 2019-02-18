@@ -5,6 +5,7 @@ import (
 	"github.com/rs/zerolog/log"
 	"test/extend/redis"
 	"test/models"
+	"time"
 )
 
 // UserService 用户服务层逻辑
@@ -31,7 +32,8 @@ func (us *UserService) PushList(uid string,goodsId string ,raise int)(err error)
 		log.Error().Msg(err.Error())
 		return
 	}
-	data :=[3]string{uid,goodsId,string(raise)}
+	createTime := time.Now().UnixNano()
+	data :=[4]string{uid,goodsId,string(raise),string(createTime)}
 	j,err :=json.Marshal(data)
 	if err != nil {
 		log.Error().Msg(err.Error())

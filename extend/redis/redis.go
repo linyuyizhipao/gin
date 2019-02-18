@@ -176,6 +176,17 @@ func HMGET(key ...interface{}) (s []string, err error){
 	return
 
 }
+//hget
+func HMSET(key ...interface{}) (b bool, err error){
+	conn := GetRedisConn().Get()
+	defer conn.Close()
+
+	hmset,err :=conn.Do("hmset", key...)
+	b, err = redis.Bool(hmset,err)
+	return
+
+}
+
 
 //sadd
 func SADD(key string,val ...string)(err error){
@@ -183,5 +194,14 @@ func SADD(key string,val ...string)(err error){
 	defer conn.Close()
 
 	conn.Do("SADD", key, val)
+	return
+}
+
+//sget
+func SMEMBERS(key string)(s []string,err error){
+	conn := GetRedisConn().Get()
+	defer conn.Close()
+
+	s,err = redis.Strings(conn.Do("SMEMBERS", key))
 	return
 }

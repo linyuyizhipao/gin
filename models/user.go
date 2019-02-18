@@ -14,6 +14,9 @@ type User struct {
 	Status		string
 	Balance		int
 }
+func (User) TableName() string {
+	return "user"
+}
 
 // Insert 新增用户
 func (user *User) Insert() (userID uint, err error) {

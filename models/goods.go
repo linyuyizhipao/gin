@@ -14,18 +14,22 @@ type Goods struct {
 type AuctionGoods struct {
 	GoodsId string
 	BeginAuctionTime string //商品竞拍开始时间
-	minPrice int //竞拍允许的最小价格
+	MinPrice int //竞拍允许的最小价格
 	Status int8 //0：未锁定可被继续竞拍叫价；1：已被用户锁定
 	Uid string //用户uid
 	ResPrice int //最终的竞拍价格
-	LockTime string //锁定时间
+	UpdateTime string //更新时间
 }
 
 //商品竞拍记录信息结构体
 //某个商品在什么时候被谁以什么价格竞拍了
 type AuctionRecord struct {
-    GoodsId string
-    Uid string
-    AuctionPrice int
-    CreateTime string //产生时间
+    GoodsId string `gorm:"column:goods_id"`
+    Uid string `gorm:"column:uid"`
+    AuctionPrice int `gorm:"auction_price"`
+    CreateTime string `gorm:"create_time"` //产生时间
 }
+func (AuctionRecord) TableName() string {
+	return "auction_record"
+}
+
