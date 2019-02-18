@@ -91,7 +91,7 @@ func raiseprice(msg string) (b bool){
 	goodsSer.AuctionPrice ,_= strconv.Atoi(msgJson[2])
 	goodsSer.CreateTime = msgJson[3]
 	//为该商品产生该用户为其加出的指定金额的价格行为记录
-	if b := goodsSer.AddRaiseRecord(goodsSer.AuctionRecord);b != true {
+	if b = goodsSer.AddRaiseRecord(goodsSer.AuctionRecord);b != true {
 		return
 	}
 
