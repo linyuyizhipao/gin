@@ -41,8 +41,14 @@ func InitRouter() *gin.Engine {
 			apiV1.GET("/auth/signout", authController.Signout)
 
 		}
-
 	}
+	//用户抬价
+	AuctionController := new(v1.AuctionController)
+	{
+		apiV1.POST("/auth/raise_price", AuctionController.RaisePrice)
+	}
+
+
 
 	return r
 }

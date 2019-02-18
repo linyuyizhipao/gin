@@ -1,6 +1,13 @@
 package v1
 
-import "github.com/gin-gonic/gin"
+import (
+	"github.com/asaskevich/govalidator"
+	"github.com/gin-gonic/gin"
+	"github.com/rs/zerolog/log"
+	"test/extend/code"
+	"test/extend/utils"
+	"test/service"
+)
 
 type AuctionController struct{}
 
@@ -16,19 +23,42 @@ type AuctionController struct{}
 // @Failure 400 {string} json "{"status":400, "code": 4000001, msg:"请求参数有误"}"
 // @Failure 500 {string} json "{"status":500, "code": 5000001, msg:"服务器内部错误"}"
 // @Router /auth/signup [post]
-func (a AuthController) RaisePrice(ctx *gin.Context){
+func (a AuctionController) RaisePrice(c *gin.Context){
 
+	log.Debug().Msg("用户抬价...")
 	//接收参数并验证
+	reqParam := RaisePriceReq{}
+	if result,err := govalidator.ValidateStruct(reqParam);err!=nil || result != true {
+		//输出错误
+		log.Debug().Msg(err.Error())
+		utils.ResponseFormat(c,code.RequestParamError,err.Error())
+		return
+	}
 
 	//检查用户对该商品是否具备当前加价行为的资格
+	userSer := service.UserService{}
+	if b,err := userSer.CheckUserRaise(reqParam.Uid,reqParam.RaisePrice);err==nil || b == false{
+		log.Error().Msg(err.Error())
+		utils.ResponseFormat(c,code.Success,map[string]interface{}{})
+	}
 
 	//组装用户对该商品进行该价格加价行为的消息主体转为json后发送到redis规律队列中
-
+	if err := userSer.PushList(reqParam.Uid,reqParam.GoodsId,reqParam.RaisePrice);err!=nil{
+		log.Error().Msg(err.Error())
+		utils.ResponseFormat(c,code.ServiceInsideError,"")
+		return
+	}
 	//返回指定格式json给客户端，表达用户当前加价行为结果信息
 
+	utils.ResponseFormat(c,code.Success,"竞拍成功")
+	return
 
 }
-
+type RaisePriceReq struct {
+	Uid string `valid:"required"`
+	GoodsId string `valid:"required"`
+	RaisePrice int `valid:"required"`
+}
 
 //处理用户发送过来的加价消息，并将处理成功的消息发送到客户端
 func processorRaiseMsg(){

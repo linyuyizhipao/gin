@@ -1,10 +1,12 @@
 package v1
 
 import (
+	"fmt"
 	"github.com/gin-gonic/gin"
 	"github.com/rs/zerolog/log"
 	"test/extend/code"
 	"test/extend/jwt"
+	"test/extend/redis"
 	"test/extend/utils"
 	"test/service"
 )
@@ -31,36 +33,7 @@ type SignupRequest struct {
 // @Failure 500 {string} json "{"status":500, "code": 5000001, msg:"服务器内部错误"}"
 // @Router /auth/signup [post]
 func (ac AuthController) Signup(c *gin.Context) {
-	log.Info().Msg("enter signup controller")
-	reqBody := SignupRequest{}
-	if err := c.ShouldBindJSON(&reqBody); err != nil {
-		log.Error().Msg(err.Error())
-		utils.ResponseFormat(c, code.RequestParamError, nil)
-		return
-	}
 
-	log.Debug().Msgf("email param: %s", reqBody.Email)
-	log.Debug().Msgf("confirmPass param: %s", reqBody.ConfirmPass)
-
-	if reqBody.AccountPass != reqBody.ConfirmPass {
-		utils.ResponseFormat(c, code.SignupPassUnmatch, nil)
-		return
-	}
-
-	userService := service.UserService{
-		Email: reqBody.Email,
-		Password: reqBody.ConfirmPass,
-	}
-	userID, err := userService.StoreUser(reqBody.Email, reqBody.ConfirmPass)
-	if err != nil {
-		log.Error().Msg(err.Error())
-		utils.ResponseFormat(c, code.ServiceInsideError, nil)
-		return
-	}
-	log.Info().Msgf("signup controller result userId: %d", userID)
-
-	utils.ResponseFormat(c, code.Success, map[string]uint{ "userId": userID })
-	return
 }
 
 // SigninRequest 账号登录请求参数
@@ -82,46 +55,8 @@ type SigninRequest struct {
 // @Failure 500 {string} json "{"status":500, "code": 5000001, msg:"服务器内部错误"}"
 // @Router /auth/signin [post]
 func (ac AuthController) Signin(c *gin.Context) {
-	log.Info().Msg("enter Signin controller")
-	reqBody := SigninRequest{}
-	err := c.ShouldBindJSON(&reqBody)
-	if err != nil {
-		log.Error().Msg(err.Error())
-		utils.ResponseFormat(c, code.RequestParamError, nil)
-		return
-	}
-	// 登录验证
-	userService := service.UserService{
-		Email: reqBody.Email,
-	}
-	user, err := userService.QueryByEmail(reqBody.Email)
-	if err != nil {
-		log.Error().Msg(err.Error())
-		utils.ResponseFormat(c, code.ServiceInsideError, nil)
-		return
-	}
-	if user == nil || user.Password != utils.MakeSha1(reqBody.Email+reqBody.Password) {
-		utils.ResponseFormat(c, code.SigninInfoError, nil)
-		return
-	}
-
-	// 生成 Token
-	authService := service.AuthService{
-		User: user,
-	}
-	token, err := authService.GenerateToken(*user)
-	if err != nil {
-		utils.ResponseFormat(c, code.ServiceInsideError, nil)
-		return
-	}
-
-	utils.ResponseFormat(c, code.Success, map[string]interface{}{
-		"userId": user.ID,
-		"userName": user.UserName,
-		"email": user.Email,
-		"token": token,
-	})
-	return
+	fmt.Println(112233)
+	redis.HMGET("ht","ss","dd")
 }
 
 // @Summary 账号注销

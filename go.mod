@@ -1,7 +1,7 @@
 module test
 
 require (
-	github.com/asaskevich/govalidator v0.0.0-20180720115003-f9ffefc3facf // indirect
+	github.com/asaskevich/govalidator v0.0.0-20180720115003-f9ffefc3facf
 	github.com/dgrijalva/jwt-go v3.2.0+incompatible
 	github.com/fatih/color v1.7.0
 	github.com/gin-contrib/cors v0.0.0-20190101123304-5e7acb10687f

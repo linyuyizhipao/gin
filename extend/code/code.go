@@ -12,6 +12,7 @@ type Code struct {
 var (
 	// Success 请求处理成功
 	Success = &Code{http.StatusOK, 2000001, "请求处理成功"}
+	BalanceError = &Code{http.StatusOK, 8000001, "用户账户余额不足"}
 	// RequestParamError 请求参数错误
 	RequestParamError = &Code{http.StatusBadRequest, 4000001, "请求参数有误"}
 	// AccountPassUnmatch 该账号原密码不匹配

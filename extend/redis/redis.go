@@ -1,10 +1,11 @@
 package redis
 
 import (
-	"time"
-	"strconv"
+	"fmt"
 	"github.com/gomodule/redigo/redis"
+	"strconv"
 	"test/extend/conf"
+	"time"
 )
 
 var redisConn *redis.Pool
@@ -35,6 +36,7 @@ func Setup() error {
 					return nil, err
 				}
 			}
+			fmt.Println(conf.RedisConf.DBNum)
 			// 选择数据库
 			if _, err := c.Do("SELECT", conf.RedisConf.DBNum); err != nil {
 				c.Close()
@@ -51,6 +53,11 @@ func Setup() error {
 		},
 
 	}
+
+
+
+
+
 	return nil
 }
 
@@ -125,3 +132,56 @@ func DelLike(key string) error {
 	return nil
 }
 
+
+// HGETALL 方法
+func HGETALL(key string) (s []string, err error) {
+	conn := GetRedisConn().Get()
+	defer conn.Close()
+
+	reply, err := redis.Values(conn.Do("hgetall", key))
+	if err != nil {
+		return
+	}
+
+	for _,va :=range reply{
+		if b,ok := va.([]byte); ok  {
+			s = append(s,string(b))
+		}
+	}
+
+	return
+}
+
+
+//hget
+func HGET(key string,keya string) (s string, err error){
+	conn := GetRedisConn().Get()
+	defer conn.Close()
+
+	s, err = redis.String(conn.Do("HGET", key,keya))
+	if err != nil {
+		return
+	}
+	return
+}
+
+//hget
+func HMGET(key ...interface{}) (s []string, err error){
+	conn := GetRedisConn().Get()
+	defer conn.Close()
+
+	hmget,err :=conn.Do("hmget", key...)
+	s, err = redis.Strings(hmget,err)
+
+	return
+
+}
+
+//sadd
+func SADD(key string,val ...string)(err error){
+	conn := GetRedisConn().Get()
+	defer conn.Close()
+
+	conn.Do("SADD", key, val)
+	return
+}
