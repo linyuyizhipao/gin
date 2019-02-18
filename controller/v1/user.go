@@ -16,9 +16,9 @@ type AuctionController struct{}
 // @Description 多用户同时对商品进行加价
 // @Accept json
 // @Produce json
-// @Tags auth
+// @Tags auction
 // @ID auction.RaisePrice
-// @Param body body v1.SignupRequest true "账号注册请求参数"
+// @Param body body v1.RaisePriceReq true "账号注册请求参数"
 // @Success 200 {string} json "{"status":200, "code": 2000001, msg:"请求处理成功"}"
 // @Failure 400 {string} json "{"status":400, "code": 4000001, msg:"请求参数有误"}"
 // @Failure 500 {string} json "{"status":500, "code": 5000001, msg:"服务器内部错误"}"
@@ -28,6 +28,7 @@ func (a AuctionController) RaisePrice(c *gin.Context){
 	log.Debug().Msg("用户抬价...")
 	//接收参数并验证
 	reqParam := RaisePriceReq{}
+	c.ShouldBindJSON(&reqParam)
 	if result,err := govalidator.ValidateStruct(reqParam);err!=nil || result != true {
 		//输出错误
 		log.Debug().Msg(err.Error())
@@ -55,9 +56,9 @@ func (a AuctionController) RaisePrice(c *gin.Context){
 
 }
 type RaisePriceReq struct {
-	Uid string `valid:"required"`
-	GoodsId string `valid:"required"`
-	RaisePrice int `valid:"required"`
+	Uid string `json:"uid" valid:"required"`
+	GoodsId string `json:"goodsId" valid:"required"`
+	RaisePrice int `json:"raisePrice" valid:"required"`
 }
 
 //处理用户发送过来的加价消息，并将处理成功的消息发送到客户端
