@@ -1,12 +1,10 @@
 package v1
 
 import (
-	"fmt"
 	"github.com/gin-gonic/gin"
 	"github.com/rs/zerolog/log"
 	"test/extend/code"
 	"test/extend/jwt"
-	"test/extend/redis"
 	"test/extend/utils"
 	"test/service"
 )
@@ -55,9 +53,51 @@ type SigninRequest struct {
 // @Failure 500 {string} json "{"status":500, "code": 5000001, msg:"服务器内部错误"}"
 // @Router /auth/signin [post]
 func (ac AuthController) Signin(c *gin.Context) {
-	fmt.Println(112233)
-	redis.HMGET("ht","ss","dd")
+	log.Info().Msg("enter Signin controller")
+	reqBody := SigninRequest{}
+	reqBody.Email = "136235@qq.com"
+	err := c.ShouldBindJSON(&reqBody)
+	if err != nil && false{
+		log.Error().Msg(err.Error())
+		utils.ResponseFormat(c, code.RequestParamError, nil)
+		return
+	}
+	// 登录验证
+	userService := service.UserService{}
+	userService.Email =  reqBody.Email
+	userService.ID = 12
+	userService.UserName = "hushuang"
+	//user, err := userService.QueryByEmail(reqBody.Email)
+	//if err != nil {
+	//	log.Error().Msg(err.Error())
+	//	utils.ResponseFormat(c, code.ServiceInsideError, nil)
+	//	return
+	//}
+	//if user == nil || user.Password != utils.MakeSha1(reqBody.Email+reqBody.Password) {
+	//	utils.ResponseFormat(c, code.SigninInfoError, nil)
+	//	return
+	//}
+
+	// 生成 Token
+	authService := service.AuthService{
+		User: &(userService.User),
+	}
+	user := &userService.User
+	token, err := authService.GenerateToken(*user)
+	if err != nil {
+		utils.ResponseFormat(c, code.ServiceInsideError, nil)
+		return
+	}
+
+	utils.ResponseFormat(c, code.Success, map[string]interface{}{
+		"userId": user.ID,
+		"userName": user.UserName,
+		"email": user.Email,
+		"token": token,
+	})
+	return
 }
+
 
 // @Summary 账号注销
 // @Description 用户账号注销

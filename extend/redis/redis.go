@@ -134,20 +134,11 @@ func DelLike(key string) error {
 
 
 // HGETALL 方法
-func HGETALL(key string) (s []string, err error) {
+func HGETALL(key string) (reply []string, err error) {
 	conn := GetRedisConn().Get()
 	defer conn.Close()
 
-	reply, err := redis.Values(conn.Do("hgetall", key))
-	if err != nil {
-		return
-	}
-
-	for _,va :=range reply{
-		if b,ok := va.([]byte); ok  {
-			s = append(s,string(b))
-		}
-	}
+	reply, err = redis.Strings(conn.Do("hgetall", key))
 
 	return
 }
@@ -197,11 +188,29 @@ func SADD(key string,val ...string)(err error){
 	return
 }
 
-//sget
+//SMEMBERS
 func SMEMBERS(key string)(s []string,err error){
 	conn := GetRedisConn().Get()
 	defer conn.Close()
 
 	s,err = redis.Strings(conn.Do("SMEMBERS", key))
+	return
+}
+
+//RPOP
+func RPOP(key string)(s string,err error){
+	conn := GetRedisConn().Get()
+	defer conn.Close()
+
+	s,err = redis.String(conn.Do("RPOP", key))
+	return
+}
+
+//LPOP
+func LPOP(key string)(s string,err error){
+	conn := GetRedisConn().Get()
+	defer conn.Close()
+
+	s,err = redis.String(conn.Do("LPOP", key))
 	return
 }

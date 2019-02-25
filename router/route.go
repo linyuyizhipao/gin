@@ -31,7 +31,7 @@ func InitRouter() *gin.Engine {
 		// 账号注册
 		apiV1.POST("/auth/signup", authController.Signup)
 		// 账号登录
-		apiV1.POST("/auth/signin", authController.Signin)
+		apiV1.GET("/auth/signin", authController.Signin)
 
 
 		//中间件作用路由组
