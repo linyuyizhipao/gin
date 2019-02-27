@@ -1,0 +1,137 @@
+basePath: '{{.BasePath}}'
+definitions:
+  v1.RaisePriceReq:
+    properties:
+      goodsId:
+        type: string
+      raisePrice:
+        type: integer
+      uid:
+        type: string
+    type: object
+  v1.SigninRequest:
+    properties:
+      email:
+        type: string
+      password:
+        type: string
+    required:
+    - email
+    - password
+    type: object
+  v1.SignupRequest:
+    properties:
+      accountPass:
+        type: string
+      confirmPass:
+        type: string
+      email:
+        type: string
+    required:
+    - accountPass
+    - confirmPass
+    - email
+    type: object
+host: '{{.Host}}'
+info:
+  contact: {}
+  description: '{{.Description}}'
+  license: {}
+  title: '{{.Title}}'
+  version: '{{.Version}}'
+paths:
+  /auth/signin:
+    post:
+      consumes:
+      - application/json
+      description: 通过邮箱密码登录账号
+      operationId: auth.signin
+      parameters:
+      - description: 账号登录请求参数
+        in: body
+        name: body
+        required: true
+        schema:
+          $ref: '#/definitions/v1.SigninRequest'
+          type: object
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: '{"status":200, "code": 2000001, msg:"请求处理成功"}'
+          schema:
+            type: string
+        "400":
+          description: '{"status":400, "code": 4000001, msg:"请求参数有误"}'
+          schema:
+            type: string
+        "401":
+          description: '{"status":401, "code": 4010001, msg:"账号或密码有误"}'
+          schema:
+            type: string
+        "500":
+          description: '{"status":500, "code": 5000001, msg:"服务器内部错误"}'
+          schema:
+            type: string
+      summary: 账号登录
+      tags:
+      - auth
+  /auth/signout:
+    post:
+      consumes:
+      - application/json
+      description: 用户账号注销
+      operationId: auth.signout
+      parameters:
+      - description: 认证 Token 值
+        in: header
+        name: Authorization
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: '{"status":200, "code": 2000001, msg:"请求处理成功"}'
+          schema:
+            type: string
+        "500":
+          description: '{"status":500, "code": 5000001, msg:"服务器内部错误"}'
+          schema:
+            type: string
+      summary: 账号注销
+      tags:
+      - auth
+  /auth/signup:
+    post:
+      consumes:
+      - application/json
+      description: 多用户同时对商品进行加价
+      operationId: auction.RaisePrice
+      parameters:
+      - description: 账号注册请求参数
+        in: body
+        name: body
+        required: true
+        schema:
+          $ref: '#/definitions/v1.RaisePriceReq'
+          type: object
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: '{"status":200, "code": 2000001, msg:"请求处理成功"}'
+          schema:
+            type: string
+        "400":
+          description: '{"status":400, "code": 4000001, msg:"请求参数有误"}'
+          schema:
+            type: string
+        "500":
+          description: '{"status":500, "code": 5000001, msg:"服务器内部错误"}'
+          schema:
+            type: string
+      summary: 竞拍时用户加价
+      tags:
+      - auction
+swagger: "2.0"

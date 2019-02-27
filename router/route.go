@@ -3,6 +3,8 @@ package router
 import (
 	"github.com/gin-contrib/cors"
 	"github.com/gin-gonic/gin"
+	"github.com/swaggo/gin-swagger"
+	"github.com/swaggo/gin-swagger/swaggerFiles"
 	"test/controller/v1"
 	"test/extend/conf"
 	"test/middleware"
@@ -24,6 +26,9 @@ func InitRouter() *gin.Engine {
 		AllowCredentials: conf.CORSConf.AllowCredentials,
 		MaxAge:           conf.CORSConf.MaxAge * time.Hour,
 	}))
+
+	r.GET("/swagger/*any", ginSwagger.WrapHandler(swaggerFiles.Handler))
+
 	//v1路由组
 	apiV1 := r.Group("api/v1")
 	authController := new(v1.AuthController)

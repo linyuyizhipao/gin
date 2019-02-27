@@ -21,6 +21,7 @@ func main() {
 
 	//mvc路由配置
 	router := router.InitRouter()
+
 	//启动服务
 	router.Run(fmt.Sprintf(":%d", conf.ServerConf.Port))
 }
