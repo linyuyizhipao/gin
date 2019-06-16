@@ -10,6 +10,8 @@ import (
 	goJWT "github.com/dgrijalva/jwt-go"
 )
 
+const LOGIN_REDIS_PREFIX_KEY_NAME = "TOKEN:"
+const LOGIN_REDIS_KEY_VALID = 60 * 60
 // AuthService 认证相关
 type AuthService struct {
 	User *models.User
@@ -26,7 +28,7 @@ func (as *AuthService) GenerateToken(user models.User) (string, error) {
 		Email:    user.Email,
 		StandardClaims: goJWT.StandardClaims{
 			ExpiresAt: nowTime.Add(expireTime * time.Hour).Unix(),
-			Issuer:    "monitor",
+			Issuer:    "hugo",
 		},
 	}
 	// 创建token
@@ -36,12 +38,12 @@ func (as *AuthService) GenerateToken(user models.User) (string, error) {
 	}
 
 	// 设置redis缓存
-	const hourSecs int = 60 * 60
-	redis.Set("TOKEN:"+user.Email, token, conf.ServerConf.JWTExpire * hourSecs)
+	const hourSecs int = LOGIN_REDIS_KEY_VALID
+	redis.Set(LOGIN_REDIS_PREFIX_KEY_NAME+user.Email, token, conf.ServerConf.JWTExpire * hourSecs)
 	return token, nil
 }
 
 // DestroyToken 销毁 Token
 func (as *AuthService) DestroyToken(email string) (bool, error) {
-	return redis.Del("TOKEN:"+email)
+	return redis.Del(LOGIN_REDIS_PREFIX_KEY_NAME+email)
 }

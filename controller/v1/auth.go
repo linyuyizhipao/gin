@@ -4,23 +4,28 @@ import (
 	"github.com/gin-gonic/gin"
 	"github.com/rs/zerolog/log"
 	"test/extend/code"
-	"test/extend/jwt"
 	"test/extend/utils"
+	"test/models"
 	"test/service"
 )
+
+const DEDFAULT_USER_STATUS = 0//用户默认注册时候默认的status的值
+const DEFAUKT_USER_BALANCE = 0 //用户注册时候默认的账户余额
 
 // AuthController 用户控制器
 type AuthController struct{}
 
 // SignupRequest 账号注册请求参数
 type SignupRequest struct {
+	Username       string `json:"username" binding:"required"`
 	Email       string `json:"email" binding:"required,email"`
-	AccountPass string `json:"accountPass" binding:"required"`
+	Avatar       string `json:"avatar" binding:"required"`
+	Password string `json:"password" binding:"required"`
 	ConfirmPass string `json:"confirmPass" binding:"required"`
 }
 
 // @Summary 账号注册
-// @Description 通过邮箱密码注册账号
+// @Description 注册自己的登录账号
 // @Accept json
 // @Produce json
 // @Tags auth
@@ -31,12 +36,38 @@ type SignupRequest struct {
 // @Failure 500 {string} json "{"status":500, "code": 5000001, msg:"服务器内部错误"}"
 // @Router /auth/signup [post]
 func (ac AuthController) Signup(c *gin.Context) {
+	log.Info().Msg("开始注册了啊")
+	reqBody := SignupRequest{}
+	if err := c.ShouldBindJSON(&reqBody);err != nil{
+		log.Error().Msg(err.Error())
+		utils.ResponseFormat(c,code.RequestParamError,nil)
+		return
+	}
 
+	if reqBody.Password != reqBody.ConfirmPass{
+		log.Error().Msg("注册确认密码二次输入不一致")
+		utils.ResponseFormat(c,code.SignupPassUnmatch,nil)
+		return
+	}
+	userModel := models.User{}
+	userModel.UserName = reqBody.Username
+	userModel.Password =userModel.Encryption(reqBody.Password)
+	userModel.Email = reqBody.Email
+	userModel.Avatar = reqBody.Avatar
+	userModel.Balance = DEDFAULT_USER_STATUS
+	userModel.Status = DEFAUKT_USER_BALANCE
+	if _,err := userModel.Insert();err!=nil{
+		log.Error().Msg(err.Error())
+		utils.ResponseFormat(c,code.DbErrorInsert,nil)
+		return
+	}
+	utils.ResponseFormat(c,code.Success,"")
+    return
 }
 
 // SigninRequest 账号登录请求参数
 type SigninRequest struct {
-	Email string `json:"email" binding:"required,email"`
+	Username string `json:"username" binding:"required"`
 	Password string `json:"password" binding:"required,max=20"`
 }
 
@@ -55,71 +86,44 @@ type SigninRequest struct {
 func (ac AuthController) Signin(c *gin.Context) {
 	log.Info().Msg("enter Signin controller")
 	reqBody := SigninRequest{}
-	reqBody.Email = "136235@qq.com"
-	err := c.ShouldBindJSON(&reqBody)
-	if err != nil && false{
+	if err := c.ShouldBindJSON(&reqBody);err!=nil{
 		log.Error().Msg(err.Error())
 		utils.ResponseFormat(c, code.RequestParamError, nil)
 		return
 	}
+
+
 	// 登录验证
-	userService := service.UserService{}
-	userService.Email =  reqBody.Email
-	userService.ID = 12
-	userService.UserName = "hushuang"
-	//user, err := userService.QueryByEmail(reqBody.Email)
-	//if err != nil {
-	//	log.Error().Msg(err.Error())
-	//	utils.ResponseFormat(c, code.ServiceInsideError, nil)
-	//	return
-	//}
-	//if user == nil || user.Password != utils.MakeSha1(reqBody.Email+reqBody.Password) {
-	//	utils.ResponseFormat(c, code.SigninInfoError, nil)
-	//	return
-	//}
+	userModel := models.User{}
+	userInfo,err := userModel.FindOne(map[string]interface{}{"user_name":reqBody.Username})
+
+	if err!=nil{
+		log.Error().Msg(err.Error())
+		utils.ResponseFormat(c, code.DbErrorSelete, nil)
+		return
+	}
+
+	reqBody.Password = userInfo.Encryption(reqBody.Password)
+	if userInfo.Password != reqBody.Password{
+		utils.ResponseFormat(c, code.LoginPasswordErr, nil)
+		return
+	}
 
 	// 生成 Token
 	authService := service.AuthService{
-		User: &(userService.User),
+		User: userInfo,
 	}
-	user := &userService.User
-	token, err := authService.GenerateToken(*user)
+	token, err := authService.GenerateToken(*userInfo)
 	if err != nil {
 		utils.ResponseFormat(c, code.ServiceInsideError, nil)
 		return
 	}
 
 	utils.ResponseFormat(c, code.Success, map[string]interface{}{
-		"userId": user.ID,
-		"userName": user.UserName,
-		"email": user.Email,
+		"userId": userInfo.ID,
+		"userName": userInfo.UserName,
+		"email": userInfo.Email,
 		"token": token,
 	})
-	return
-}
-
-
-// @Summary 账号注销
-// @Description 用户账号注销
-// @Accept json
-// @Produce json
-// @Tags auth
-// @ID auth.signout
-// @Param Authorization header string true "认证 Token 值"
-// @Success 200 {string} json "{"status":200, "code": 2000001, msg:"请求处理成功"}"
-// @Failure 500 {string} json "{"status":500, "code": 5000001, msg:"服务器内部错误"}"
-// @Router /auth/signout [post]
-func (ac AuthController) Signout(c *gin.Context) {
-	log.Info().Msg("enter signout controller")
-	claims := c.MustGet("claims").(*jwt.CustomClaims)
-	log.Debug().Msgf("claims: %v", claims)
-	// 销毁 token
-	authService := service.AuthService{}
-	isOK, err := authService.DestroyToken(claims.Email)
-	if err != nil || isOK == false {
-		utils.ResponseFormat(c, code.ServiceInsideError, nil)
-		return
-	}
-	utils.ResponseFormat(c, code.Success, map[string]interface{}{})
 	return
 }
