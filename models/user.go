@@ -1,8 +1,12 @@
 package models
 
 import (
+	"crypto/md5"
+	"encoding/hex"
 	"github.com/jinzhu/gorm"
 )
+
+const SECRET_KEY = "hugo"
 
 // User 用户表 model 定义
 type User struct {
@@ -11,11 +15,11 @@ type User struct {
 	Password	string
 	Email		string
 	Avatar		string
-	Status		string
+	Status		int
 	Balance		int
 }
 func (User) TableName() string {
-	return "tbl_user"
+	return "tb_user"
 }
 
 // Insert 新增用户
@@ -32,7 +36,7 @@ func (user *User) Insert() (userID uint, err error) {
 // FindOne 查询用户详情
 func (user *User) FindOne(condition map[string]interface{}) (*User, error) {
 	var userInfo User
-	r := DB.Select("id, name, email, avatar, password")
+	r := DB.Select("id, user_name, email, avatar, password")
 		re :=r.Where(condition)
 		result := re.First(&userInfo)
 
@@ -80,5 +84,14 @@ func (user *User) DeleteOne(userID uint) (delUser User, err error) {
 		return
 	}
 	delUser = *user
+	return
+}
+//密码加密储存
+func (user *User)Encryption(password string)(ecryPassword string){
+	key := password + SECRET_KEY
+	sec  :=md5.New()
+	sec.Write([]byte(key))
+	cipherStr := sec.Sum(nil)
+	ecryPassword = hex.EncodeToString(cipherStr)
 	return
 }

@@ -25,12 +25,19 @@ var (
 	UploadSuffixError = &Code{http.StatusBadRequest, 4000005, "该上传文件格式目前暂不支持"}
 	// UploadSizeLimit 目前上传仅支持小于5M的文件内容
 	UploadSizeLimit = &Code{http.StatusBadRequest, 4000006, "目前上传仅支持小于5M的文件内容"}
+	LoginPasswordErr = &Code{http.StatusBadRequest, 4000007, "登录密码错误"}
+
+
+
 	// SigninInfoError 账户名或密码有误
 	SigninInfoError = &Code{http.StatusUnauthorized, 4010001, "账户名或密码有误"}
 	// TokenNotFound 请求未携带Token, 无权访问
 	TokenNotFound = &Code{http.StatusUnauthorized, 4010002, "请求未携带Token, 无权访问"}
 	// TokenInvalid 无效的Token信息
 	TokenInvalid = &Code{http.StatusUnauthorized, 4010003, "无效的Token信息"}
+
+	DbErrorInsert = &Code{http.StatusUnauthorized, 4020000, "数据库插入失败"}
+	DbErrorSelete = &Code{http.StatusUnauthorized, 4020000, "数据库查询失败"}
 	// ServiceInsideError 服务器内部错误
 	ServiceInsideError = &Code{http.StatusInternalServerError, 5000001, "服务器内部错误"}
 )
