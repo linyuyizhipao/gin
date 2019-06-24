@@ -47,13 +47,5 @@ func InitRouter() *gin.Engine {
 
 		}
 	}
-	//用户抬价
-	AuctionController := new(v1.AuctionController)
-	{
-		apiV1.POST("/auth/raise_price", AuctionController.RaisePrice)
-	}
-
-
-
 	return r
 }

@@ -6,6 +6,7 @@ import (
 	"test/extend/code"
 	"test/extend/jwt"
 	"test/extend/utils"
+	"test/models"
 	"test/service"
 )
 
@@ -31,7 +32,23 @@ type SignupRequest struct {
 // @Failure 500 {string} json "{"status":500, "code": 5000001, msg:"服务器内部错误"}"
 // @Router /auth/signup [post]
 func (ac AuthController) Signup(c *gin.Context) {
-
+	resBody := SignupRequest{}
+	if err := c.ShouldBind(&resBody);err != nil{
+		log.Error().Msg(err.Error())
+		utils.ResponseFormat(c,code.RequestParamError,"参数验证错误")
+		return
+	}
+	user := models.User{}
+	user.Email = resBody.Email
+	user.UserName = resBody.Email
+	user.Password = resBody.AccountPass
+	_,err := user.Insert()
+	if err != nil {
+		utils.ResponseFormat(c,code.RequestParamError,"插入失败")
+		return
+	}
+	utils.ResponseFormat(c,code.Success,"成功")
+	return
 }
 
 // SigninRequest 账号登录请求参数
@@ -67,17 +84,6 @@ func (ac AuthController) Signin(c *gin.Context) {
 	userService.Email =  reqBody.Email
 	userService.ID = 12
 	userService.UserName = "hushuang"
-	//user, err := userService.QueryByEmail(reqBody.Email)
-	//if err != nil {
-	//	log.Error().Msg(err.Error())
-	//	utils.ResponseFormat(c, code.ServiceInsideError, nil)
-	//	return
-	//}
-	//if user == nil || user.Password != utils.MakeSha1(reqBody.Email+reqBody.Password) {
-	//	utils.ResponseFormat(c, code.SigninInfoError, nil)
-	//	return
-	//}
-
 	// 生成 Token
 	authService := service.AuthService{
 		User: &(userService.User),

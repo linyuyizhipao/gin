@@ -7,6 +7,7 @@ require (
 	git.apache.org/thrift.git v0.12.0 // indirect
 	github.com/PuerkitoBio/purell v1.1.1 // indirect
 	github.com/Shopify/sarama v1.21.0 // indirect
+	github.com/alecthomas/template v0.0.0-20160405071501-a0175ee3bccc
 	github.com/asaskevich/govalidator v0.0.0-20180720115003-f9ffefc3facf
 	github.com/coreos/go-systemd v0.0.0-20190212144455-93d5ec2c7f76 // indirect
 	github.com/dgrijalva/jwt-go v3.2.0+incompatible
@@ -61,7 +62,7 @@ require (
 	github.com/sirupsen/logrus v1.3.0 // indirect
 	github.com/spf13/viper v1.3.1
 	github.com/swaggo/gin-swagger v1.1.0
-	github.com/swaggo/swag v1.4.1 // indirect
+	github.com/swaggo/swag v1.4.1
 	github.com/ugorji/go/codec v0.0.0-20190204201341-e444a5086c43 // indirect
 	go.opencensus.io v0.19.0 // indirect
 	go4.org v0.0.0-20190218023631-ce4c26f7be8e // indirect

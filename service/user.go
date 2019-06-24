@@ -1,11 +1,8 @@
 package service
 
 import (
-	"github.com/gin-gonic/gin/json"
 	"github.com/rs/zerolog/log"
-	"test/extend/redis"
 	"test/models"
-	"time"
 )
 
 // UserService 用户服务层逻辑
@@ -25,20 +22,4 @@ func (us *UserService) CheckUserRaise(uid string,raisePrice int) (b bool, err er
 	b = userInfo.Balance > raisePrice
 	return
 }
-//用户加价行为入redis队列
-func (us *UserService) PushList(uid string,goodsId string ,raise int)(err error){
-	listKey,err := GoodsSer.getListNamePassGoodsId(goodsId)
-	if err != nil {
-		log.Error().Msg(err.Error())
-		return
-	}
-	createTime := time.Now().UnixNano()
-	data :=[4]string{uid,goodsId,string(raise),string(createTime)}
-	j,err :=json.Marshal(data)
-	if err != nil {
-		log.Error().Msg(err.Error())
-		return
-	}
-	err = redis.SADD(listKey,string(j))
-	return
-}
+

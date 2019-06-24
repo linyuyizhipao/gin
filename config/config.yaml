@@ -29,11 +29,11 @@ email:
 database:
   dbType: mysql
   user: root
-  password: 123456
+  password: root
   host: 127.0.0.1
-  port: 33070
-  dbName: db_monitor
-  tablePrefix: tb_
+  port: 3306
+  dbName: test
+  tablePrefix:
   debug: true
 
 # redis 配置

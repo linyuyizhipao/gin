@@ -6,7 +6,7 @@ import (
 
 // User 用户表 model 定义
 type User struct {
-	gorm.Model
+	ID uint
 	UserName	string
 	Password	string
 	Email		string
@@ -15,7 +15,7 @@ type User struct {
 	Balance		int
 }
 func (User) TableName() string {
-	return "user"
+	return "tbl_user"
 }
 
 // Insert 新增用户
